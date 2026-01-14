@@ -1,11 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
+import React, { useState, useEffect, useRef, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Search, ChevronDown, ArrowRight, MapPin, Check, SlidersHorizontal, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import PropertyImage from "@/components/PropertyImage";
 
 // Options
 const PROPERTY_TYPES = ["Estate", "Penthouse", "Villa", "Modern", "Alpine", "Historic", "Skyline", "Desert"];
@@ -19,9 +17,9 @@ const PRICE_RANGES = [
 ];
 const NUMBER_OPTIONS = ["1+", "2+", "3+", "4+", "5+"];
 
-export default function SearchWidget() {
+function SearchWidgetContent() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Added
+  const searchParams = useSearchParams();
   const supabase = createClient();
   const searchRef = useRef<HTMLDivElement>(null);
   
@@ -79,7 +77,7 @@ export default function SearchWidget() {
     };
     const delayDebounce = setTimeout(fetchSuggestions, 300);
     return () => clearTimeout(delayDebounce);
-  }, [locationQuery]);
+  }, [locationQuery, supabase]);
 
   // Execute Search
   const handleSearch = () => {
@@ -118,7 +116,7 @@ export default function SearchWidget() {
         {/* Inputs Container */}
         <div className="flex flex-col md:grid md:grid-cols-12 gap-px bg-white/10 border border-white/10 !overflow-visible">
           
-          {/* 1. LOCATION (Order 1) - Z-Index 60 */}
+          {/* 1. LOCATION */}
           <div className="md:col-span-4 relative order-1 z-[60]">
               <div 
                 className="bg-black/60 flex items-center px-4 py-4 hover:bg-black/80 transition-colors cursor-text backdrop-blur-md h-full"
@@ -157,7 +155,7 @@ export default function SearchWidget() {
               )}
           </div>
 
-          {/* 2. PRICE (Order 2) - Desktop Only - Z-Index 50 */}
+          {/* 2. PRICE (Desktop Only) */}
           <div className="hidden md:block md:col-span-2 relative order-2 z-[50]">
               <div 
                 className="bg-black/60 flex items-center justify-between px-4 py-4 hover:bg-black/80 transition-colors cursor-pointer border-l border-white/5 backdrop-blur-md h-full"
@@ -189,7 +187,7 @@ export default function SearchWidget() {
               )}
           </div>
 
-          {/* 🟢 MOBILE TOGGLE: More Filters (Order 3) - Z-Index 40 */}
+          {/* MOBILE TOGGLE */}
           <div className="md:hidden order-3 border-t border-white/10 relative z-[40]">
              <button 
                 onClick={() => setShowAdvancedMobile(!showAdvancedMobile)}
@@ -200,7 +198,7 @@ export default function SearchWidget() {
              </button>
           </div>
 
-          {/* 🟢 ANIMATED CONTAINER (Order 4) - Z-Index 30 */}
+          {/* ANIMATED CONTAINER */}
           <div 
              className={`
                 order-4 md:col-span-6 md:grid md:grid-cols-6 md:gap-px relative z-[30]
@@ -224,25 +222,17 @@ export default function SearchWidget() {
                     </div>
                     <ChevronDown size={14} className="text-gray-500 shrink-0 ml-2" />
                   </div>
-
                   {activeMenu === "price" && (
                     <div className="absolute top-full left-0 w-full mt-px bg-[#111] border border-white/10 shadow-2xl z-[100] max-h-[400px] overflow-y-auto">
                         <div onClick={() => { setSelectedPrice(""); setActiveMenu("none"); }} className="px-6 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer">Any Price</div>
                         {PRICE_RANGES.map(price => (
-                          <div 
-                              key={price.value} 
-                              onClick={() => { setSelectedPrice(price.value); setActiveMenu("none"); }} 
-                              className="px-6 py-3 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 flex justify-between items-center cursor-pointer last:border-0"
-                          >
-                              {price.label}
-                              {selectedPrice === price.value && <Check size={14} className="text-[#D4AF37]"/>}
-                          </div>
+                          <div key={price.value} onClick={() => { setSelectedPrice(price.value); setActiveMenu("none"); }} className="px-6 py-3 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 border-b border-white/5 flex justify-between items-center cursor-pointer">{price.label} {selectedPrice === price.value && <Check size={14} className="text-[#D4AF37]"/>}</div>
                         ))}
                     </div>
                   )}
               </div>
 
-              {/* 3. TYPE (Col-2) */}
+              {/* 3. TYPE */}
               <div className={`md:col-span-2 relative border-t border-white/10 md:border-t-0 ${activeMenu === "type" ? "z-50" : "z-10"}`}>
                   <div 
                     className="bg-black/60 flex items-center justify-between px-4 py-4 hover:bg-black/80 transition-colors cursor-pointer md:border-l border-white/5 backdrop-blur-md h-full"
@@ -254,24 +244,17 @@ export default function SearchWidget() {
                     </div>
                     <ChevronDown size={14} className="text-gray-500 shrink-0 ml-2" />
                   </div>
-
                   {activeMenu === "type" && (
                     <div className="absolute top-full left-0 w-full mt-px bg-[#111] border border-white/10 shadow-2xl z-[100] max-h-[400px] overflow-y-auto">
                         <div onClick={() => { setSelectedType(""); setActiveMenu("none"); }} className="px-6 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer">All Types</div>
                         {PROPERTY_TYPES.map(type => (
-                          <div 
-                              key={type} 
-                              onClick={() => { setSelectedType(type); setActiveMenu("none"); }} 
-                              className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 flex justify-between items-center cursor-pointer last:border-0"
-                          >
-                              {type} {selectedType === type && <Check size={14} className="text-[#D4AF37]"/>}
-                          </div>
+                          <div key={type} onClick={() => { setSelectedType(type); setActiveMenu("none"); }} className="px-6 py-3 text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 flex justify-between items-center cursor-pointer">{type} {selectedType === type && <Check size={14} className="text-[#D4AF37]"/>}</div>
                         ))}
                     </div>
                   )}
               </div>
 
-              {/* 4. BEDS (Col-2) */}
+              {/* 4. BEDS */}
               <div className={`md:col-span-2 relative border-t border-white/10 md:border-t-0 ${activeMenu === "beds" ? "z-50" : "z-0"}`}>
                   <div 
                     className="bg-black/60 flex items-center justify-between px-3 py-4 hover:bg-black/80 transition-colors cursor-pointer md:border-l border-white/5 backdrop-blur-md h-full"
@@ -283,24 +266,17 @@ export default function SearchWidget() {
                     </div>
                     <ChevronDown size={14} className="text-gray-500 shrink-0" />
                   </div>
-
                   {activeMenu === "beds" && (
                     <div className="absolute top-full left-0 w-full mt-px bg-[#111] border border-white/10 shadow-2xl z-[100] max-h-[400px] overflow-y-auto">
-                        <div onClick={() => { setSelectedBeds(""); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer">Any</div>
+                        <div onClick={() => { setSelectedBeds(""); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 border-b border-white/5 cursor-pointer">Any</div>
                         {NUMBER_OPTIONS.map(num => (
-                          <div 
-                              key={num} 
-                              onClick={() => { setSelectedBeds(num); setActiveMenu("none"); }} 
-                              className="px-4 py-3 text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 flex justify-between items-center cursor-pointer last:border-0"
-                          >
-                              {num} {selectedBeds === num && <Check size={14} className="text-[#D4AF37]"/>}
-                          </div>
+                          <div key={num} onClick={() => { setSelectedBeds(num); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-300 hover:text-white hover:bg-white/5 border-b border-white/5 flex justify-between items-center cursor-pointer">{num} {selectedBeds === num && <Check size={14} className="text-[#D4AF37]"/>}</div>
                         ))}
                     </div>
                   )}
               </div>
 
-              {/* 5. BATHS (Col-2) */}
+              {/* 5. BATHS */}
               <div className={`md:col-span-2 relative border-t border-white/10 md:border-t-0 ${activeMenu === "baths" ? "z-50" : "z-0"}`}>
                   <div 
                     className="bg-black/60 flex items-center justify-between px-3 py-4 hover:bg-black/80 transition-colors cursor-pointer md:border-l border-white/5 backdrop-blur-md h-full"
@@ -312,25 +288,18 @@ export default function SearchWidget() {
                     </div>
                     <ChevronDown size={14} className="text-gray-500 shrink-0" />
                   </div>
-
                   {activeMenu === "baths" && (
                     <div className="absolute top-full left-0 w-full mt-px bg-[#111] border border-white/10 shadow-2xl z-[100] max-h-[400px] overflow-y-auto">
-                        <div onClick={() => { setSelectedBaths(""); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 cursor-pointer">Any</div>
+                        <div onClick={() => { setSelectedBaths(""); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 border-b border-white/5 cursor-pointer">Any</div>
                         {NUMBER_OPTIONS.map(num => (
-                          <div 
-                              key={num} 
-                              onClick={() => { setSelectedBaths(num); setActiveMenu("none"); }} 
-                              className="px-4 py-3 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors border-b border-white/5 flex justify-between items-center cursor-pointer last:border-0"
-                          >
-                              {num} {selectedBaths === num && <Check size={14} className="text-[#D4AF37]"/>}
-                          </div>
+                          <div key={num} onClick={() => { setSelectedBaths(num); setActiveMenu("none"); }} className="px-4 py-3 text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 border-b border-white/5 flex justify-between items-center cursor-pointer">{num} {selectedBaths === num && <Check size={14} className="text-[#D4AF37]"/>}</div>
                         ))}
                     </div>
                   )}
               </div>
           </div>
 
-          {/* 6. SEARCH BUTTON (Order 5) - Z-Index 10 */}
+          {/* 6. SEARCH BUTTON */}
           <div className="order-5 md:col-span-12 border-t border-white/10 md:border-t-0 md:mt-2 relative z-[10]">
              <button 
                 onClick={handleSearch}
@@ -340,7 +309,15 @@ export default function SearchWidget() {
              </button>
           </div>
         </div>
-        
     </div>
+  );
+}
+
+// RESTORED EXPORT
+export default function SearchWidget() {
+  return (
+    <Suspense fallback={<div className="h-20 bg-black/20 animate-pulse" />}>
+      <SearchWidgetContent />
+    </Suspense>
   );
 }
