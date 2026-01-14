@@ -46,24 +46,22 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/30"></div>
         
-        {/* 🟢 NEW: Back Link (Top Left of Hero) */}
-        <div className="absolute top-28 md:top-32 left-6 md:left-12 z-20">
-          <Link 
-            href="/" 
-            className="flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-white hover:text-[#D4AF37] transition-all bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full hover:bg-black hover:border-[#D4AF37]"
-          >
-            <ArrowLeft size={14} /> Back to Search
-          </Link>
-        </div>
-
         {/* Title Overlay */}
         <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-10 pointer-events-none">
           
-          {/* 🟢 UPDATED: items-start (Mobile Left) -> md:items-end (Desktop Right) */}
           <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6 pointer-events-auto">
             
             {/* Left Content (Title/Location) */}
             <div className="w-full">
+              
+              {/* 🟢 MOVED: Back to Search (Aligned vertically above tags) */}
+              <Link 
+                href="/" 
+                className="inline-flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-white hover:text-[#D4AF37] transition-all bg-black/40 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full hover:bg-black hover:border-[#D4AF37] mb-6"
+              >
+                <ArrowLeft size={14} /> Back to Search
+              </Link>
+
               <div className="flex gap-4 mb-4">
                 <span className="bg-[#D4AF37] text-black px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
                   {property.tag || 'Exclusive'}
@@ -78,7 +76,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
               </div>
             </div>
             
-            {/* Right Content (Price) - Left aligned on Mobile, Right on Desktop */}
+            {/* Right Content (Price) */}
             <div className="text-left md:text-right pb-2 md:pb-0 w-full md:w-auto"> 
               <p className="text-4xl md:text-5xl font-light text-[#D4AF37] drop-shadow-lg">{property.price}</p>
               <p className="text-gray-400 text-xs uppercase tracking-widest mt-1">
@@ -135,11 +133,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 <p>
                   Experience the pinnacle of luxury living in this architectural masterpiece. 
                   Every detail has been meticulously curated to offer an unparalleled lifestyle of elegance and comfort.
-                  Floor-to-ceiling glass walls seamlessly blend indoor and outdoor living spaces, flooding the interiors with natural light.
-                </p>
-                <p>
-                  The chef's kitchen features custom Italian cabinetry and top-of-the-line appliances, 
-                  while the primary suite serves as a private sanctuary with panoramic views and a spa-inspired bath.
                 </p>
               </div>
             </div>
@@ -181,9 +174,6 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                 <form className="space-y-4">
                   <input placeholder="Your Name" className="w-full bg-black border border-white/20 p-4 text-sm text-white outline-none focus:border-[#D4AF37]" />
                   <input placeholder="Email Address" className="w-full bg-black border border-white/20 p-4 text-sm text-white outline-none focus:border-[#D4AF37]" />
-                  <input placeholder="Phone Number" className="w-full bg-black border border-white/20 p-4 text-sm text-white outline-none focus:border-[#D4AF37]" />
-                  <textarea placeholder="I am interested in this property..." rows={4} className="w-full bg-black border border-white/20 p-4 text-sm text-white outline-none focus:border-[#D4AF37] resize-none"></textarea>
-                  
                   <button className="w-full bg-[#D4AF37] text-black font-bold uppercase text-xs tracking-widest py-4 hover:bg-white transition-colors">
                     Schedule Viewing
                   </button>

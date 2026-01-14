@@ -2,23 +2,18 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Heart, Menu, X, Search, Globe } from "lucide-react"; 
+import { Heart, Menu, X } from "lucide-react"; 
 import { useSaved } from "@/context/SavedContext"; 
 
-// Helper for Gold Slide Effect
 const NavLink = ({ href, label, onClick }: { href: string; label: string; onClick?: () => void }) => (
   <Link 
     href={href} 
     onClick={onClick}
-    className="relative group py-2"
+    className="relative group py-2 whitespace-nowrap" // Added whitespace-nowrap to prevent text wrapping
   >
-    {/* Text */}
     <span className="text-sm font-bold uppercase tracking-[0.2em] text-neutral-300 group-hover:text-white transition-colors duration-300">
       {label}
     </span>
-    
-    {/* Gold Underline (Slides in from left) */}
     <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#D4AF37] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 ease-out origin-left"></span>
   </Link>
 );
@@ -27,7 +22,6 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Saved Context
   const { savedIds } = useSaved();
   const [mounted, setMounted] = useState(false); 
   useEffect(() => setMounted(true), []);
@@ -38,7 +32,6 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Prevent scrolling when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -58,7 +51,7 @@ export default function Navbar() {
           }
         `}
       >
-        <div className="max-w-[1600px] mx-auto px-6 md:px-12 relative flex justify-between items-center">
+        <div className="max-w-[1600px] mx-auto px-6 md:px-12 flex justify-between items-center">
           
           {/* 1. Left: Logo */}
           <div className="flex-shrink-0 z-50">
@@ -73,8 +66,8 @@ export default function Navbar() {
           </div>
             
           {/* 2. Center: Desktop Links */}
-          {/* Gap-14 Preserved */}
-          <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 gap-14 z-10">
+          {/* FIX: Changed lg:flex to xl:flex and added responsive gap */}
+          <div className="hidden xl:flex absolute left-1/2 transform -translate-x-1/2 gap-8 2xl:gap-14 z-10">
             <NavLink href="/search?mode=buy" label="Buy" />
             <NavLink href="/sell" label="Sell" />
             <NavLink href="/search?mode=rent" label="Rent" />
@@ -84,7 +77,7 @@ export default function Navbar() {
           </div>
 
           {/* 3. Right: Actions */}
-          <div className="flex items-center gap-8 z-50">
+          <div className="flex items-center gap-6 md:gap-8 z-50">
              
              {/* Saved Icon */}
              {mounted && (
@@ -97,16 +90,17 @@ export default function Navbar() {
                           </span>
                       )}
                   </div>
-                  {/* Label hidden on mobile, visible on desktop */}
-                  <span className="hidden lg:block text-xs font-bold uppercase tracking-widest text-white group-hover:text-[#D4AF37] transition-colors">
+                  {/* FIX: Changed lg:block to xl:block to match the menu visibility */}
+                  <span className="hidden xl:block text-xs font-bold uppercase tracking-widest text-white group-hover:text-[#D4AF37] transition-colors">
                       Saved
                   </span>
                </Link>
              )}
 
              {/* Hamburger (Mobile) */}
+             {/* FIX: Changed lg:hidden to xl:hidden */}
              <button 
-                className="lg:hidden text-white hover:text-[#D4AF37] transition-colors"
+                className="xl:hidden text-white hover:text-[#D4AF37] transition-colors"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
              >
                 {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -116,9 +110,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ==========================================
-          MOBILE MENU OVERLAY
-      ========================================== */}
+      {/* MOBILE MENU OVERLAY */}
       <div 
         className={`
           fixed inset-0 bg-black z-40 flex flex-col justify-center items-center transition-all duration-500
@@ -126,51 +118,13 @@ export default function Navbar() {
         `}
       >
         <div className="flex flex-col gap-8 text-center">
-            <Link 
-              href="/search?mode=buy" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-3xl font-serif text-white hover:text-[#D4AF37] transition-colors"
-            >
-              Buy
-            </Link>
-            <Link 
-              href="/sell" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-3xl font-serif text-white hover:text-[#D4AF37] transition-colors"
-            >
-              Sell
-            </Link>
-            <Link 
-              href="/search?mode=rent" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-3xl font-serif text-white hover:text-[#D4AF37] transition-colors"
-            >
-              Rent
-            </Link>
-            
+            <Link href="/search?mode=buy" onClick={() => setIsMobileMenuOpen(false)} className="text-3xl font-serif text-white hover:text-[#D4AF37]">Buy</Link>
+            <Link href="/sell" onClick={() => setIsMobileMenuOpen(false)} className="text-3xl font-serif text-white hover:text-[#D4AF37]">Sell</Link>
+            <Link href="/search?mode=rent" onClick={() => setIsMobileMenuOpen(false)} className="text-3xl font-serif text-white hover:text-[#D4AF37]">Rent</Link>
             <div className="w-12 h-px bg-[#D4AF37] mx-auto my-4 opacity-50"></div>
-            
-            <Link 
-              href="/agents" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400 hover:text-white"
-            >
-              Agents
-            </Link>
-            <Link 
-              href="/about" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400 hover:text-white"
-            >
-              About
-            </Link>
-            <Link 
-              href="/contact" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400 hover:text-white"
-            >
-              Contact
-            </Link>
+            <Link href="/agents" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400">Agents</Link>
+            <Link href="/about" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400">About</Link>
+            <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-xl font-sans uppercase tracking-[0.2em] text-neutral-400">Contact</Link>
         </div>
       </div>
     </>

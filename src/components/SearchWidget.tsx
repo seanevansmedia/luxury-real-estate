@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation"; // Added useSearchParams
 import { Search, ChevronDown, ArrowRight, MapPin, Check, SlidersHorizontal, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import PropertyImage from "@/components/PropertyImage";
@@ -21,6 +21,7 @@ const NUMBER_OPTIONS = ["1+", "2+", "3+", "4+", "5+"];
 
 export default function SearchWidget() {
   const router = useRouter();
+  const searchParams = useSearchParams(); // Added
   const supabase = createClient();
   const searchRef = useRef<HTMLDivElement>(null);
   
@@ -32,6 +33,14 @@ export default function SearchWidget() {
   const [selectedBaths, setSelectedBaths] = useState(""); 
   const [activeTab, setActiveTab] = useState("buy");
   
+  // Sync tab with URL parameter
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    if (mode && (mode === "buy" || mode === "rent" || mode === "sold")) {
+      setActiveTab(mode);
+    }
+  }, [searchParams]);
+
   // Mobile Toggle State
   const [showAdvancedMobile, setShowAdvancedMobile] = useState(false);
 
